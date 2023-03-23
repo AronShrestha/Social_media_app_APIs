@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'user',
     'feeds',
-    'user_profile',
+    'userProfile'
+   
 ]
 
 # REST_FRAMEWORK = {

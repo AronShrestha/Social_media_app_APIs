@@ -20,12 +20,12 @@ class NewsfeedSerializer(serializers.ModelSerializer):
 class GetPostSerializers(serializers.ModelSerializer):
     class Meta :
         model = Posts
-        fields =['user','caption','image','video']
+        fields =['user','caption','image']
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model =Posts
-        fields = ['caption','image','video']
+        fields = ['caption','image']
     
     def create(self, validated_data):
         post = Posts.objects.create(
@@ -34,19 +34,45 @@ class PostSerializer(serializers.ModelSerializer):
             image = validated_data['image'],
            
             )
-        print("Username "+post.user.username)
+        print(f"Username {post.user} ")
         return post
 
 class PostCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        field = ['comment_text']
+        fields = ['post','comment_text']
     
-    def create(self,validaed_data):
-        comment = Comment.objects.create(
-            user = self.context.get('user'),
-            post = self.context.get('post'),
-            comment_text = validaed_data['comment_text'], 
-        )
-        print(f"post {post} posted by {user}")
+    def create(self,validated_data):
+        # comment = Comment.objects.create(
+        #     user = self.context.get('user'),
+        #     post = validated_data['post'],
+        #     comment_text = validated_data['comment_text'], 
+        # )
+        user = self.context.get('user')
+        post = validated_data['post']
+        comment_text = validated_data['comment_text']
+        print(f"Printing validate data {validated_data}")
+        parent = self.context.get('parent')
+
+        if parent == "":
+            comment = Comment.objects.create(
+                user = user,
+                post=post,
+                comment_text=comment_text
+            )
+        else:
+            replyoOf = Comment.objects.get(pk=parent)
+            comment = Comment.objects.create(
+                user = user,
+                post=post,
+                comment_text=comment_text,
+                parent = replyoOf
+            )
+
+        print(f"post {comment.post} posted by {comment.user}")
         return comment
+
+class GetCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = "__all__"

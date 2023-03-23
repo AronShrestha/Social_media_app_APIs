@@ -24,8 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('user.urls')),
     path('feed/',include('feeds.urls')),
-    path('profile/',include('user_profile.urls')),
+    path('profile/',include('userProfile.urls')),
 ]
 if settings.DEBUG:
-        urlpatterns += static(settings.MEDIA_URL,
-                              document_root=settings.MEDIA_ROOT)
+        urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

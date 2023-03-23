@@ -7,7 +7,7 @@ urlpatterns =[
     path('detail/<pk>',GetDetailView.as_view(),name='get-profile-detail'),
     path('follow', follow_unfollow_profie,name='follow-unfollow-view'),
     path('followers',GetFollowers.as_view(),name = 'get-followers'),
-    path('followers',GetFollowers_name.as_view(),name = 'get-followers-names'),
+    path('followers_name',GetFollowers_name.as_view(),name = 'get-followers-names'),
 
 
 ]

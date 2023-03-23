@@ -13,7 +13,7 @@ from user.error import CustomizeRenderer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Posts,Comment,Like
-from user_profile.models import Profile
+from userProfile.models import Profile
 from rest_framework.decorators import api_view
 
 
@@ -21,7 +21,7 @@ from rest_framework.decorators import api_view
 #     if request.method == "GET":
 #         print("In Feed section buddy")
 #         return HttpResponse("Hello World")
-    
+  
 #     if request.method == "POST":
 #         print("In Feed section buddy")
 #         return HttpResponse("POST REQUEST")
@@ -32,24 +32,49 @@ class PostFeed(APIView):
     render_classes =[CustomizeRenderer]
     permission_classes = [IsAuthenticated] #user resetting password when he is already logged in
     def post(self,request):
-        serializer = PostSerializer(data =request.data,context ={'user':request.user})
+        print(f"Print profile {request.user.profile}")
+        serializer = PostSerializer(data =request.data,context ={'user':request.user.profile})
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response({'msg':'Feed Posted Successfully'},status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class PostComment(APIView):
     render_classes =[CustomizeRenderer]
     permission_classes = [IsAuthenticated] #user resetting password when he is already logged in
     def post(self,request):
-        serializer = PostSerializer(data = request.data, context ={'user':request.user,'post':request.post})
+        print(f"++++++++++++++++++++++++++Printing request data {request.data['parent']}+++++++++++")
+        try:
+           replyoOf = Comment.objects.get(pk=request.data['parent'])
+        except Comment.DoesNotExist:
+            return Response({"Msg":"Sorry no comment to reply"})
+
+        serializer = PostCommentSerializer(data = request.data, context ={'user':request.user,'parent':request.data['parent']})
+        
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response({'msg':'Comented Posted Successfully'},status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+class GetComment(APIView):
+    # render_classes =[CustomizeRenderer]
+    # permission_classes = [IsAuthenticated] #user resetting password when he is already logged in
+    def get(self,request,id):
+        print("In profile detail view")
+        
+        try:
+            post = Posts.objects.get(pk = id)
+            comments = post.get_comments()
+            print(f"comments on the post {id} are {comments}")
+        
+        except:
+            return Response(status = status.HTTP_404_NOT_FOUND)
+        serializers = GetCommentSerializer(comments, many=True)
+        return Response(serializers.data)
+
 
 class GetFeed(APIView):
     def get(self,request,key):

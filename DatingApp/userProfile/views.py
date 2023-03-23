@@ -56,24 +56,27 @@ class GetFollowers_name(APIView):
         followers = {'user':[frn.username for frn in my_profile.following.all()]}
         print(f"Followers {followers}")
         serializers =  FollowerSerializer_name(followers)
-        print(f"Serializer {serializers.data}")
-     
-  
+        print(f"Serializer {serializers.data}")    
         return Response(serializers.data)
+    
+    
 @api_view(['GET','POST'])
 def follow_unfollow_profie(request):
     if request.method == "POST":
         serializer =Follow_Unfollow_Serializer(data=request.data)
+        print(f"data we got from client after serializing {serializer}")
         serializer.is_valid(raise_exception=True)
         my_profile = Profile.objects.get(user=request.user)
-        pk = serializer.data['id']
-        current_profile = Profile.objects.get(pk=pk)
-        if current_profile.user in my_profile.following.all():
-            my_profile.following.remove(current_profile.user)
-        else:
-            my_profile.following.add(current_profile.user)
-        
-        return HttpResponse(f"Followed {current_profile.user.username}")
-    return HttpResponse("Not ")
+        try :
+            pk = serializer.data['id']
+            current_profile = Profile.objects.get(pk=pk)
+            if current_profile.user in my_profile.following.all():
+                my_profile.following.remove(current_profile.user)
+            else:
+                my_profile.following.add(current_profile.user)
+            
+            return HttpResponse(f"Followed {current_profile.user.username}")
+        except :
 
+            return HttpResponse("User not found")
 
