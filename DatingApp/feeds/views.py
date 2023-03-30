@@ -35,23 +35,28 @@ class PostFeed(APIView):
         print(f"Print profile {request.user.profile}")
         serializer = PostSerializer(data =request.data,context ={'user':request.user.profile})
         if serializer.is_valid(raise_exception=True):
+            
             serializer.save()
             return Response({'msg':'Feed Posted Successfully'},status=status.HTTP_200_OK)
         else:
+            
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PostComment(APIView):
     render_classes =[CustomizeRenderer]
     permission_classes = [IsAuthenticated] #user resetting password when he is already logged in
+  
     def post(self,request):
-        print(f"++++++++++++++++++++++++++Printing request data {request.data['parent']}+++++++++++")
-        try:
-           replyoOf = Comment.objects.get(pk=request.data['parent'])
-        except Comment.DoesNotExist:
-            return Response({"Msg":"Sorry no comment to reply"})
+        if  request.data['parent'] == "":
+            serializer = PostCommentSerializer(data = request.data, context ={'user':request.user,'parent':""})
+        else:
+            try:
+                replyoOf = Comment.objects.get(pk=request.data['parent'])
+            except Comment.DoesNotExist:
+                return Response({"Msg":"Sorry no comment to reply"})
 
-        serializer = PostCommentSerializer(data = request.data, context ={'user':request.user,'parent':request.data['parent']})
+            serializer = PostCommentSerializer(data = request.data, context ={'user':request.user,'parent':request.data['parent']})
         
         if serializer.is_valid(raise_exception=True):
             serializer.save()
@@ -75,6 +80,35 @@ class GetComment(APIView):
         serializers = GetCommentSerializer(comments, many=True)
         return Response(serializers.data)
 
+
+class PostLike(APIView):
+      
+    render_classes =[CustomizeRenderer]
+    permission_classes = [IsAuthenticated] #user resetting password when he is already logged in
+    def post(self,request):
+
+        print("Now into serializer")
+        serializer = PostLikeSerializer(data = request.data, context ={'user':request.user})
+        print("After ")
+        if serializer.is_valid(raise_exception = True):
+            print("IS valid")
+            serializer.save()
+            return Response({'msg':'Comented Posted Successfully'},status=status.HTTP_200_OK)
+        else:
+            print("Error")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class GetLike(APIView):
+    def get(self,request,id):
+        likes = Like.objects.filter(post=id)
+        like_count = len(likes)
+        print(f"like count is {like_count}")
+        
+
+
+        return Response({"like_count":like_count})
+
+        
 
 class GetFeed(APIView):
     def get(self,request,key):
@@ -104,3 +138,4 @@ def newsfeeds(request):
    
     print(f"Printing the serialize +++=={serializers.data}")
     return Response(serializers.data)
+

@@ -73,6 +73,24 @@ class PostCommentSerializer(serializers.ModelSerializer):
         return comment
 
 class GetCommentSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
     class Meta:
         model = Comment
         fields = "__all__"
+
+class PostLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ["post"]
+    
+    def create(self, validated_data):
+        temp = Like.objects.filter(post=validated_data['post'])
+
+        number = len(temp)+1
+        print(f"Number is {number}")
+        like = Like.objects.create(
+            user = self.context.get('user'),
+            post = validated_data['post'],
+            count = number
+        )
+        return like

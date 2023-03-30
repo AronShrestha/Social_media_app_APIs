@@ -16,6 +16,8 @@ class Posts(models.Model):
     def __str__(self) -> str:
         return str(self.caption)
     
+    def get_likes(self):
+        return self.likes.all()
     # timestamp = models.DateTimeField(auto_now_add=True)
 
 class Comment(models.Model):
@@ -28,15 +30,15 @@ class Comment(models.Model):
 
 class Like(models.Model):
     user  = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Posts,on_delete=models.CASCADE ,blank=True)
-    comment = models.ForeignKey(Comment,on_delete=models.CASCADE)
+    post = models.ForeignKey(Posts,on_delete=models.CASCADE ,related_name="likes")
+ 
     # timestamp = models.DateTimeField(auto_now_add=True)
     count = models.IntegerField()
 
 class Unlike(models.Model):
     user  = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Posts, on_delete=models.CASCADE,blank=True)
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+  
     timestamp = models.DateTimeField(auto_now_add=True)
     # count = models.IntegerField()
 
